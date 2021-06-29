@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+  db:
+    container_name: "db"
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+  web:
+    container_name: "app"
+    restart: always
+    environment:
+      DB_HOST: db
+      WAIT_HOSTS: db:5432
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
