@@ -6,12 +6,10 @@ const { knexSnakeCaseMappers } = require("objection");
 
 module.exports = {
   development: {
-    client: "pg",
+    client: "sqlite3",
+    useNullAsDefault: true,
     connection: {
-      database: POSTGRES_DB,
-      password: POSTGRES_PASSWORD,
-      host: DB_HOST,
-      user: POSTGRES_USER,
+      filename: "./db.sqlite",
     },
     migrations: {
       directory: "./db/migrations",

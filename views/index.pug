@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  .container
+    if !user
+      h1 Please Log In
+    else
+      h1= `Welcome, ${user.firstName} ${user.lastName}`
+
+    if user && pages
+      each page in pages 
+        ul
+          li= `ID: ${page.id}`
+          li= `Name: ${page.name}`
+          li= `Category: ${page.category}`
