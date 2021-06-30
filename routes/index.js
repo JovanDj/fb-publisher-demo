@@ -10,18 +10,53 @@ router.get("/", isAuthenticated, async (req, res) => {
   let pages;
   try {
     const { data } = await axios(
-      `https://graph.facebook.com/v11.0/${req.user.facebookId}/accounts?fields=data,id,name,category&access_token=EAAHQ0pp9PeMBAFNWWvd43o0D1EZAmWZAMIrPBHLIHNqjgjuMmEVmm9tB7zNmBgZBKwNhnvIXuboWAfiFq1cZAVhcsywsRYrSQ3pFgrvxoNqkLuQ863fFnZCg21dL1ZA9rQ435843bbIzyQDu1v9axGAqoI8dEy5qfxS8y7OpB9oAZDZD`
+      `https://graph.facebook.com/v11.0/${req.user.facebookId}/accounts?fields=data,id,name,category&access_token=EAAHQ0pp9PeMBAP0vv3PDDSxgH24yraQnmaToTfClmZCXHAgh1tTMVx9yScwm9HRcWRsQe0OrGiVDo7jnZBsSs00jykjuUWNPvhMGljmgnEk9a6FtxvW5ZBNhIxNK7tNOH9pBjFNZAnWDySA23Jh1AWyEyHCEeCxiFZCxzys1YsgZDZD`
     );
 
-    console.log(data)
+    console.log(data);
     res.render("index", { user: req.user, pages: data.data });
-
   } catch (error) {
     console.error(error);
 
     throw error;
   }
-
 });
 
+router.get("/pages/:pageId", (req, res) => {
+  res.render("page", {
+    page: { id: req.params.pageId, name: req.query.name },
+  });
+});
+
+router.post("/pages/:pageId", async (req, res) => {
+  const { post } = req.body;
+  const { pageId } = req.params;
+  console.log(pageId);
+
+  try {
+    // Get page token
+    const { data: pageToken } = await axios(
+      "https://graph.facebook.com/" +
+        pageId +
+        "?fields=access_token&access_token=EAAHQ0pp9PeMBAP0vv3PDDSxgH24yraQnmaToTfClmZCXHAgh1tTMVx9yScwm9HRcWRsQe0OrGiVDo7jnZBsSs00jykjuUWNPvhMGljmgnEk9a6FtxvW5ZBNhIxNK7tNOH9pBjFNZAnWDySA23Jh1AWyEyHCEeCxiFZCxzys1YsgZDZD"
+    );
+
+    console.log("PAGE TOKEN: ", pageToken);
+
+    const { data } = await axios.post(
+      "https://graph.facebook.com/" +
+        pageId +
+        "/feed?message=" +
+        post +
+        "&access_token=" +
+        pageToken.access_token
+    );
+
+    console.log(data);
+
+    res.redirect("/");
+  } catch (error) {
+    console.error(error);
+  }
+});
 module.exports = router;

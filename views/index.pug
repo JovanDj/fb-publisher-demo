@@ -10,6 +10,7 @@ block content
     if user && pages
       each page in pages 
         ul
-          li= `ID: ${page.id}`
+          li
+            a(href=`/pages/${page.id}?name=${page.name}`)= `ID: ${page.id}`
           li= `Name: ${page.name}`
           li= `Category: ${page.category}`

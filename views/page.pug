@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  .container
+    h1 Create a post for
+      span.text-primary= `${page.name}`
+
+    form(method="POST", action=`/pages/${page.id}`)
+      .mb-3
+        label.form-label(for="post") Post
+        textarea#post.form-control(cols=20, name="post")
+      button.btn.btn-primary(type="submit") Submit

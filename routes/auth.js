@@ -6,7 +6,12 @@ router.post(
   "/facebook",
   passport.authenticate("facebook", {
     authType: "reauthenticate",
-    scope: ["email", "pages_manage_posts", "pages_show_list"],
+    scope: [
+      "email",
+      "pages_manage_posts",
+      "pages_show_list",
+      "pages_read_engagement",
+    ],
   })
 );
 
