@@ -7,6 +7,6 @@ block content
 
     form(method="POST", action=`/pages/${page.id}`)
       .mb-3
-        label.form-label(for="post") Post
-        textarea#post.form-control(cols=20, name="post")
+        label.form-label(for="post") RSS feed url
+        input#post.form-control(type="text", name="rss")
       button.btn.btn-primary(type="submit") Submit
