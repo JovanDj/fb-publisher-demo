@@ -20,4 +20,20 @@ module.exports = {
 
     ...knexSnakeCaseMappers(),
   },
+
+  production: {
+    client: "sqlite3",
+    useNullAsDefault: true,
+    connection: {
+      filename: "./db.sqlite",
+    },
+    migrations: {
+      directory: "./db/migrations",
+    },
+    seeds: {
+      directory: "./db/seeds",
+    },
+
+    ...knexSnakeCaseMappers(),
+  },
 };
