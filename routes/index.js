@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { isAuthenticated } = require("../middleware");
 const axios = require("axios").default;
-const { FB_APP_ID, FB_APP_SECRET, FB_CALLBACK_URL } = process.env;
+const { FB_APP_ID, FB_APP_SECRET, FB_CALLBACK_URL, FB_ACCESS_TOKEN } =
+  process.env;
 const Parser = require("rss-parser");
 const parser = new Parser();
 
@@ -10,7 +11,7 @@ router.get("/", isAuthenticated, async (req, res) => {
   let pages;
   try {
     const { data } = await axios(
-      `https://graph.facebook.com/v11.0/${req.user.facebookId}/accounts?fields=data,id,name,category&access_token=EAAHQ0pp9PeMBAKxy4GHCLkIHRdXdZA7nAm1Q1bcpSaRZA4EXuqZAWNGpnPvzhFE3D7syK8czWmx07y0Ag6gPQZAeJX52oGpZBwfmGARYjoVsM9PUYGLZC2Jeiqf8jPj46F2KbZCi71JALgXj7L2O33TGwXZCMlU4XdCGebOprCRuoAZDZD`
+      `https://graph.facebook.com/v11.0/${req.user.facebookId}/accounts?fields=data,id,name,category&access_token=${FB_ACCESS_TOKEN}`
     );
 
     console.log(data);
@@ -41,9 +42,7 @@ router.post("/pages/:pageId", async (req, res) => {
 
     // Get page token
     const { data: pageToken } = await axios(
-      "https://graph.facebook.com/" +
-        pageId +
-        "?fields=access_token&access_token=EAAHQ0pp9PeMBAKxy4GHCLkIHRdXdZA7nAm1Q1bcpSaRZA4EXuqZAWNGpnPvzhFE3D7syK8czWmx07y0Ag6gPQZAeJX52oGpZBwfmGARYjoVsM9PUYGLZC2Jeiqf8jPj46F2KbZCi71JALgXj7L2O33TGwXZCMlU4XdCGebOprCRuoAZDZD"
+      `https://graph.facebook.com/${pageId}?fields=access_token&access_token=${FB_ACCESS_TOKEN}`
     );
 
     console.log("PAGE TOKEN: ", pageToken);
