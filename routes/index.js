@@ -63,4 +63,11 @@ router.post("/pages/:pageId", async (req, res) => {
     console.error(error);
   }
 });
+
+router.post("/feeder", (req, res) => {
+  console.log(body);
+
+  res.status(200);
+});
+
 module.exports = router;
