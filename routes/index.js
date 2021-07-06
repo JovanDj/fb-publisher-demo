@@ -74,10 +74,11 @@ router.post("/subscribe", async (req, res, next) => {
   const { feed } = req.body;
 
   try {
-    await axios.get("https://stream.superfeedr.com", {
+    await axios("https://stream.superfeedr.com", {
       params: {
         wait: "stream",
         "hub.mode": "retrieve",
+        "hub.topic": feed,
         "hub.callback": "https://stormy-ravine-62749.herokuapp.com/feeder",
         format: "json",
         authorization: `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`,
