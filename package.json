@@ -4,6 +4,7 @@
   "description": "Express docker demo app",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "dev": "nodemon app.js",
     "db:migrate": "knex migrate:latest",
     "db:migrate:undo": "knex migrate:rollback --all",
