@@ -70,7 +70,7 @@ router.post("/pages/:pageId", async (req, res) => {
   }
 });
 
-router.post("subscribe", async (req, res, next) => {
+router.post("/subscribe", async (req, res, next) => {
   const { feed } = req.body;
 
   try {
