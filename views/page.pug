@@ -2,11 +2,10 @@ extends layout
 
 block content
   .container
-    h1 Create a post for
-      span.text-primary= `${page.name}`
+    h1 Subscribe To RSS Feed
 
-    form(method="POST", action=`/pages/${page.id}`)
+    form(method="POST", action=`/subscribe`)
       .mb-3
         label.form-label(for="post") RSS feed url
-        input#post.form-control(type="text", name="rss")
+        input#post.form-control(type="text", name="feed")
       button.btn.btn-primary(type="submit") Submit

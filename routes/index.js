@@ -2,8 +2,14 @@ const express = require("express");
 const router = express.Router();
 const { isAuthenticated } = require("../middleware");
 const axios = require("axios").default;
-const { FB_APP_ID, FB_APP_SECRET, FB_CALLBACK_URL, FB_ACCESS_TOKEN } =
-  process.env;
+const {
+  FB_APP_ID,
+  FB_APP_SECRET,
+  FB_CALLBACK_URL,
+  FB_ACCESS_TOKEN,
+  SUPERFEEDR_TOKEN,
+  SUPERFEEDR_USERNAME,
+} = process.env;
 const Parser = require("rss-parser");
 const parser = new Parser();
 
@@ -61,6 +67,27 @@ router.post("/pages/:pageId", async (req, res) => {
     res.redirect("/");
   } catch (error) {
     console.error(error);
+  }
+});
+
+router.post("subscribe", async (req, res, next) => {
+  const { feed } = req.body;
+
+  try {
+    await axios.get("https://stream.superfeedr.com", {
+      params: {
+        wait: "stream",
+        "hub.mode": "retrieve",
+        "hub.callback": "https://stormy-ravine-62749.herokuapp.com/feeder",
+        format: "json",
+        authorization: `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`,
+      },
+    });
+
+    res.status(200).end();
+  } catch (error) {
+    console.error(error);
+    next(error);
   }
 });
 
