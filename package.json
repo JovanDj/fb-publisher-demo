@@ -10,7 +10,8 @@
     "db:migrate:undo": "knex migrate:rollback --all",
     "db:reset": "run-s db:migrate:undo db:setup",
     "db:seed": "knex seed:run",
-    "db:setup": "run-s db:migrate db:seed"
+    "db:setup": "run-s db:migrate db:seed",
+    "build": "db:migrate && db:seed"
   },
   "author": "Digital Infinity",
   "license": "UNLICENCED",
