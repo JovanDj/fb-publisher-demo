@@ -67,7 +67,7 @@ router.post("/pages/:pageId", async (req, res) => {
 router.post("/feeder", (req, res) => {
   console.log(req.body);
 
-  res.status(200);
+  res.status(200).end();
 });
 
 module.exports = router;
