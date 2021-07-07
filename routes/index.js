@@ -21,7 +21,6 @@ router.get("/", isAuthenticated, async (req, res) => {
       `https://graph.facebook.com/v11.0/${req.user.facebookId}/accounts?fields=data,id,name,category&access_token=${FB_ACCESS_TOKEN}`
     );
 
-    console.log(data);
     res.render("index", { user: req.user, pages: data.data });
   } catch (error) {
     console.error(error);
@@ -30,13 +29,13 @@ router.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
-router.get("/pages/:pageId", (req, res) => {
+router.get("/pages/:pageId", isAuthenticated, (req, res) => {
   res.render("page", {
     page: { id: req.params.pageId, name: req.query.name },
   });
 });
 
-router.post("/pages/:pageId", async (req, res) => {
+router.post("/pages/:pageId", isAuthenticated, async (req, res) => {
   const { rss } = req.body;
   const { pageId } = req.params;
 
@@ -48,8 +47,6 @@ router.post("/pages/:pageId", async (req, res) => {
       `https://graph.facebook.com/${pageId}?fields=access_token&access_token=${FB_ACCESS_TOKEN}`
     );
 
-    console.log("PAGE TOKEN: ", pageToken);
-
     const { data } = await axios.post(
       "https://graph.facebook.com/" +
         pageId +
@@ -59,49 +56,25 @@ router.post("/pages/:pageId", async (req, res) => {
         pageToken.access_token
     );
 
-    console.log(data);
-
     res.redirect("/");
   } catch (error) {
     console.error(error);
   }
 });
 
-router.post("/feed/subscribe", async (req, res, next) => {
-  const { feed } = req.body;
-
-  try {
-    const res = await axios("https://push.superfeedr.com", {
-      params: {
-        "hub.mode": "subscribe",
-        "hub.topic": feed,
-        "hub.callback": "https://stormy-ravine-62749.herokuapp.com/feeder",
-        verify: "sync",
-        retrieve: true,
-        format: "json",
-        authorization,
-      },
-    });
-
-    console.log(res.data);
-
-    res.status(200).end();
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-});
-
-router.post("/feed/unsubscribe", async (req, res, next) => {
-  const { feed } = req.body;
+router.post("/feed/subscribe", isAuthenticated, async (req, res, next) => {
+  const { feed, fbPageId } = req.body;
 
   try {
     const { data } = await axios.post(
       "https://push.superfeedr.com",
       {
-        "hub.mode": "unsubscribe",
+        "hub.mode": "subscribe",
         "hub.topic": feed,
-        "hub.callback": "https://stormy-ravine-62749.herokuapp.com/feeder",
+        "hub.callback": `https://stormy-ravine-62749.herokuapp.com/feeder/${fbPageId}`,
+        verify: "sync",
+        retrieve: true,
+        format: "json",
       },
       {
         auth: {
@@ -111,17 +84,47 @@ router.post("/feed/unsubscribe", async (req, res, next) => {
       }
     );
 
-    console.log(data);
-
-    res.status(200).end();
+    res.redirect("/feed/list");
   } catch (error) {
     console.error(error);
     next(error);
   }
 });
 
-router.get("/feed/list", async (req, res, next) => {
+router.post("/feed/unsubscribe", isAuthenticated, async (req, res, next) => {
+  const { feed, callback } = req.body;
+
   try {
+    const { data } = await axios.post(
+      "https://push.superfeedr.com",
+      {
+        "hub.mode": "unsubscribe",
+        "hub.topic": feed,
+        "hub.callback": callback,
+      },
+      {
+        auth: {
+          username: SUPERFEEDR_USERNAME,
+          password: SUPERFEEDR_TOKEN,
+        },
+      }
+    );
+
+    res.redirect("/feed/list");
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+router.get("/feed/list", isAuthenticated, async (req, res, next) => {
+  try {
+    const { data: pages } = await axios(
+      `https://graph.facebook.com/v11.0/${req.user.facebookId}/accounts?fields=data,id,name,category&access_token=${FB_ACCESS_TOKEN}`
+    );
+
+    console.log(pages);
+
     const { data } = await axios("https://push.superfeedr.com", {
       params: {
         "hub.mode": "list",
@@ -132,17 +135,15 @@ router.get("/feed/list", async (req, res, next) => {
       },
     });
 
-    console.log(data);
-
-    res.render("subscriptions", { data });
+    res.render("subscriptions", { data, pages: pages.data });
   } catch (error) {
     console.error(error);
     next(error);
   }
 });
 
-router.post("/feeder", (req, res) => {
-  console.log(req.body);
+router.post("/feeder/:fbPageId", (req, res) => {
+  console.log(req.body, req.params.fbPageId);
 
   res.status(200).end();
 });
