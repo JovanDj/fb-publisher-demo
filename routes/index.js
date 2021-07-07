@@ -154,7 +154,7 @@ router.post("/feeder/:fbPageId", async (req, res) => {
 
     const { data } = await axios.post(
       "https://graph.facebook.com/" +
-        pageId +
+        fbPageId +
         "/feed?link=" +
         link +
         "&access_token=" +
