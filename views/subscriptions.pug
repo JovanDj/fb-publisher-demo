@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  .container
+    if data
+      h1 Subscriptions:
+      each sub in data
+        ul
+          li= `Fromat: ${sub.subscription.format}`
+          li 
+            a(href=`Endpoint: ${sub.subscription.endpoint}`)= `Endpoint: ${sub.subscription.endpoint}`
+          li Feed:
+            ul
+              li= `Title: ${sub.subscription.feed.title}`
+              li Feed url:&nbsp;
+                a(href=`${sub.subscription.feed.url}`)= `${sub.subscription.feed.url}`
+          li
+            form(method="POST", action="/feed/unsubscribe")
+              input(
+                type="hidden",
+                name="feed",
+                value=`${sub.subscription.feed.url}`
+              )
+              input(
+                type="hidden",
+                name="callback",
+                value=`${sub.subscription.endpoint}`
+              )
+              button.btn.btn-danger(type="submit") Delete

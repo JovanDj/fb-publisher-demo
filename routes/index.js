@@ -12,6 +12,7 @@ const {
 } = process.env;
 const Parser = require("rss-parser");
 const parser = new Parser();
+const authorization = `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`;
 
 router.get("/", isAuthenticated, async (req, res) => {
   let pages;
@@ -40,10 +41,6 @@ router.post("/pages/:pageId", async (req, res) => {
   const { pageId } = req.params;
 
   try {
-    // Get rss feed
-    const feed = await parser.parseURL(rss);
-    console.log(feed);
-
     const { link } = feed.items[0];
 
     // Get page token
@@ -70,22 +67,74 @@ router.post("/pages/:pageId", async (req, res) => {
   }
 });
 
-router.post("/subscribe", async (req, res, next) => {
+router.post("/feed/subscribe", async (req, res, next) => {
   const { feed } = req.body;
 
   try {
-    await axios("https://stream.superfeedr.com", {
+    const res = await axios("https://push.superfeedr.com", {
       params: {
-        wait: "stream",
-        "hub.mode": "retrieve",
+        "hub.mode": "subscribe",
         "hub.topic": feed,
         "hub.callback": "https://stormy-ravine-62749.herokuapp.com/feeder",
+        verify: "sync",
+        retrieve: true,
         format: "json",
-        authorization: `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`,
+        authorization,
       },
     });
 
+    console.log(res.data);
+
     res.status(200).end();
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+router.post("/feed/unsubscribe", async (req, res, next) => {
+  const { feed } = req.body;
+
+  try {
+    const { data } = await axios.post(
+      "https://push.superfeedr.com",
+      {
+        "hub.mode": "unsubscribe",
+        "hub.topic": feed,
+        "hub.callback": "https://stormy-ravine-62749.herokuapp.com/feeder",
+      },
+      {
+        auth: {
+          username: SUPERFEEDR_USERNAME,
+          password: SUPERFEEDR_TOKEN,
+        },
+      }
+    );
+
+    console.log(data);
+
+    res.status(200).end();
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+router.get("/feed/list", async (req, res, next) => {
+  try {
+    const { data } = await axios("https://push.superfeedr.com", {
+      params: {
+        "hub.mode": "list",
+      },
+      auth: {
+        username: SUPERFEEDR_USERNAME,
+        password: SUPERFEEDR_TOKEN,
+      },
+    });
+
+    console.log(data);
+
+    res.render("subscriptions", { data });
   } catch (error) {
     console.error(error);
     next(error);

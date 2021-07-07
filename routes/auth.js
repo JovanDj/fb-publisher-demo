@@ -17,19 +17,10 @@ router.post(
 
 router.get(
   "/facebook/callback",
-  [
-    function (req, res, next) {
-      req.session.code = req.query.code;
-      next();
-    },
-    passport.authenticate("facebook", {
-      successRedirect: "/",
-      failureRedirect: "/auth/login",
-    }),
-  ],
-  function (req, res) {
-    res.redirect("/");
-  }
+  passport.authenticate("facebook", {
+    successRedirect: "/",
+    failureRedirect: "/auth/login",
+  })
 );
 
 router.post("/logout", function (req, res) {

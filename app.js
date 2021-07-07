@@ -26,12 +26,19 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    cookie: { maxAge: 24 * 60 * 60 },
+    cookie: { maxAge: 24 * 60 * 60 * 60 },
     saveUninitialized: false,
   })
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.isAuthenticated();
+  res.locals.user = req.user;
+  res.locals.currentUrl = req.url;
+  next();
+});
 
 app.use("/", require("./routes/"));
 app.use("/users", require("./routes/users"));

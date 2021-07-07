@@ -18,12 +18,20 @@ html(lang="en")
         a.navbar-brand(href="/") Social Media Publisher Demo
 
         if user
+          a.nav-link(href="/feed/list") Subscriptions
+
           form(method="POST", action="/auth/logout")
             button.btn.btn-primary(type="submit") Logout
-        else
-            form(method="POST", action="/auth/facebook")
-                button.btn.btn-primary(type="submit") Facebook Login
 
+        else
+          form(method="POST", action="/auth/facebook")
+            button.btn.btn-primary(type="submit") Facebook Login
+
+    .container
+      if !user
+        h1 Please Log In
+      else
+        h1= `Welcome, ${user.firstName} ${user.lastName}`
     block content
 
     script(src="/main.js")
