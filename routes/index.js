@@ -157,7 +157,7 @@ router.post("/feeder/:fbPageId", async (req, res, next) => {
       "https://graph.facebook.com/" +
         fbPageId +
         "/feed?link=" +
-        link +
+        permalink +
         "&access_token=" +
         pageToken.access_token
     );
