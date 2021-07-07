@@ -143,9 +143,29 @@ router.get("/feed/list", isAuthenticated, async (req, res, next) => {
 });
 
 router.post("/feeder/:fbPageId", (req, res) => {
-  console.log(req.body, req.params.fbPageId);
+  const { permalink: link } = req.body;
+  const { fbPageId } = req.params;
 
-  res.status(200).end();
+  try {
+    // Get page token
+    const { data: pageToken } = await axios(
+      `https://graph.facebook.com/${fbPageId}?fields=access_token&access_token=${FB_ACCESS_TOKEN}`
+    );
+
+    const { data } = await axios.post(
+      "https://graph.facebook.com/" +
+        pageId +
+        "/feed?link=" +
+        link +
+        "&access_token=" +
+        pageToken.access_token
+    );
+
+    res.status(200).end();
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
 module.exports = router;
