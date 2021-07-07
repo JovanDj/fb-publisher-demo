@@ -142,7 +142,7 @@ router.get("/feed/list", isAuthenticated, async (req, res, next) => {
   }
 });
 
-router.post("/feeder/:fbPageId", (req, res) => {
+router.post("/feeder/:fbPageId", async (req, res) => {
   const { permalink: link } = req.body;
   const { fbPageId } = req.params;
 
