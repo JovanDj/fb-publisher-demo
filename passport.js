@@ -44,10 +44,17 @@ passport.use(
           email,
         } = profile._json;
 
-        const user = await User.query().findOne({ facebookId });
+        const user = await User.query().findOne({ email });
 
         if (user) {
-          return done(null, user);
+          const updatedUser = await User.query().patchAndFetchById(
+            user.userId,
+            {
+              facebookId,
+            }
+          );
+
+          return done(null, updatedUser);
         } else {
           const newUser = await User.query().insert({
             facebookId,
@@ -80,10 +87,13 @@ passport.use(
         const user = await User.query().findOne({ email });
 
         if (user) {
-          await User.query().findOne({ email }).patch({
-            twitterId,
-          });
-          return done(null, user);
+          const updatedUser = await User.query().patchAndFetchById(
+            user.userId,
+            {
+              twitterId,
+            }
+          );
+          return done(null, updatedUser);
         } else {
           const newUser = await User.query().insert({
             twitterId,
