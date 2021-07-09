@@ -75,8 +75,8 @@ passport.use(
     },
     async (token, tokenSecret, profile, done) => {
       try {
-        const { id: twitterId, email } = profile;
-
+        const { id: twitterId } = profile;
+        const email = profile.emails[0].value;
         const user = await User.query().findOne({ email });
 
         if (user) {
