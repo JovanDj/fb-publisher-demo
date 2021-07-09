@@ -71,6 +71,7 @@ passport.use(
       consumerKey: TWITTER_API_KEY,
       consumerSecret: TWITTER_API_SECRET_KEY,
       callbackURL: TWITTER_CALLBACK_URL,
+      includeEmail: true,
     },
     async (token, tokenSecret, profile, done) => {
       try {
