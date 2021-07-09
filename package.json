@@ -32,15 +32,16 @@
     "objection-password": "^3.0.0",
     "passport": "^0.4.1",
     "passport-facebook": "^3.0.0",
+    "passport-twitter": "^1.0.4",
     "pug": "^3.0.2",
     "query-strings": "0.0.1",
     "rss-parser": "^3.12.0",
     "sqlite3": "^5.0.2"
   },
   "devDependencies": {
-    "@prettier/plugin-pug": "^1.15.3",
+    "@prettier/plugin-pug": "^1.16.0",
     "faker": "^5.5.3",
-    "nodemon": "^2.0.7",
+    "nodemon": "^2.0.10",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.3.2"
   }

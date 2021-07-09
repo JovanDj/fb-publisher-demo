@@ -1,7 +1,14 @@
 const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
-const { FB_APP_ID, FB_APP_SECRET, FB_CALLBACK_URL } = process.env;
+const {
+  FB_APP_ID,
+  FB_APP_SECRET,
+  FB_CALLBACK_URL,
+  TWITTER_API_KEY,
+  TWITTER_API_SECRET_KEY,
+} = process.env;
 const User = require("./models/user");
+const TwitterStrategy = require("passport-twitter").Strategy;
 
 // Passport session setup.
 passport.serializeUser((user, done) => {
@@ -45,6 +52,38 @@ passport.use(
             facebookId,
             firstName,
             lastName,
+            email,
+            password: "placeholder password",
+          });
+          return done(null, newUser);
+        }
+      } catch (error) {
+        return done(error, null);
+      }
+    }
+  )
+);
+
+passport.use(
+  new TwitterStrategy(
+    {
+      consumerKey: TWITTER_API_KEY,
+      consumerSecret: TWITTER_API_SECRET_KEY,
+      callbackURL:
+        "https://stormy-ravine-62749.herokuapp.com/auth/twitter/callback",
+    },
+    async (token, tokenSecret, profile, cb) => {
+      try {
+        const { id: twitterId, email } = profile.id;
+
+        const user = await User.query().findOne({ email });
+
+        if (user) {
+          await user.patch({ twitterId });
+          return done(null, user);
+        } else {
+          const newUser = await User.query().insert({
+            twitterId,
             email,
             password: "placeholder password",
           });

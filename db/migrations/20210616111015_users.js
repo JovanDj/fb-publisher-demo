@@ -3,7 +3,9 @@ module.exports.up = (knex) => {
     table.increments("user_id");
     table.string("email").unique();
     table.string("password");
-    table.integer("facebookId").nullable();
+    table.integer("facebook_id").nullable();
+    table.integer("twitter_id").nullable();
+
     table.string("first_name").default("");
     table.string("last_name").default("");
 

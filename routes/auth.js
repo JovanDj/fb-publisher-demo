@@ -23,6 +23,20 @@ router.get(
   })
 );
 
+router.post("/twitter", passport.authenticate("twitter"));
+
+router.get(
+  "/twitter/callback",
+  passport.authenticate("twitter", {
+    failureRedirect: "/login",
+    successRedirect: "/",
+  }),
+  (req, res) => {
+    // Successful authentication, redirect home.
+    res.redirect("/");
+  }
+);
+
 router.post("/logout", function (req, res) {
   req.logout();
   res.redirect("/");

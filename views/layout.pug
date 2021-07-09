@@ -23,10 +23,12 @@ html(lang="en")
           form(method="POST", action="/auth/logout")
             button.btn.btn-primary(type="submit") Logout
 
-        else
+        unless (user && user.facebookId)
           form(method="POST", action="/auth/facebook")
             button.btn.btn-primary(type="submit") Facebook Login
-
+        unless (user && user.twitterId)
+          form(method="POST", action="/auth/twitter")
+            button.btn.btn-primary(type="submit") Twitter Login
     .container
       if !user
         h1 Please Log In
