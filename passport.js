@@ -6,6 +6,7 @@ const {
   FB_CALLBACK_URL,
   TWITTER_API_KEY,
   TWITTER_API_SECRET_KEY,
+  TWITTER_CALLBACK_URL,
 } = process.env;
 const User = require("./models/user");
 const TwitterStrategy = require("passport-twitter").Strategy;
@@ -69,8 +70,7 @@ passport.use(
     {
       consumerKey: TWITTER_API_KEY,
       consumerSecret: TWITTER_API_SECRET_KEY,
-      callbackURL:
-        "https://stormy-ravine-62749.herokuapp.com/auth/twitter/callback",
+      callbackURL: TWITTER_CALLBACK_URL,
     },
     async (token, tokenSecret, profile, done) => {
       try {
@@ -79,7 +79,9 @@ passport.use(
         const user = await User.query().findOne({ email });
 
         if (user) {
-          await user.patch({ twitterId });
+          await User.query().findOne({ email }).patch({
+            twitterId,
+          });
           return done(null, user);
         } else {
           const newUser = await User.query().insert({
