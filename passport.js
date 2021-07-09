@@ -72,7 +72,7 @@ passport.use(
       callbackURL:
         "https://stormy-ravine-62749.herokuapp.com/auth/twitter/callback",
     },
-    async (token, tokenSecret, profile, cb) => {
+    async (token, tokenSecret, profile, done) => {
       try {
         const { id: twitterId, email } = profile.id;
 
