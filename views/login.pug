@@ -1,4 +1,17 @@
 extends layout
 
 block content
-  .container
+  #content.page-content.p-5
+    .container
+      h1 Login
+
+      .row
+        .col-md-6
+          form(method="POST", action="/auth/login")
+            .mb-3
+              label.form-label(for="email") Email address
+              input#email.form-control(type="email", name="email")
+            .mb-3
+              label.form-label(for="passowrd") Password
+              input#password.form-control(type="password", name="password")
+            button.btn.btn-primary(type="submit") Submit

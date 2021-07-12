@@ -14,19 +14,18 @@ const Parser = require("rss-parser");
 const parser = new Parser();
 const authorization = `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`;
 
-router.get("/", isAuthenticated, async (req, res) => {
-  const { facebookId } = req.session.passport.user;
+router.get("/", isAuthenticated, async (req, res, next) => {
+  // const { facebookId } = req.session.passport.user;
 
   try {
-    const { data } = await axios(
-      `https://graph.facebook.com/v11.0/${facebookId}/accounts?fields=data,id,name,category&access_token=${FB_ACCESS_TOKEN}`
-    );
+    // const { data } = await axios(
+    //   `https://graph.facebook.com/v11.0/${facebookId}/accounts?fields=data,id,name,category&access_token=${FB_ACCESS_TOKEN}`
+    // );
 
-    res.render("index", { user: req.session.passport.user, pages: data.data });
+    res.render("index", { user: req.session.passport.user });
   } catch (error) {
     console.error(error);
-
-    throw error;
+    next(error);
   }
 });
 
@@ -123,8 +122,6 @@ router.get("/feed/list", isAuthenticated, async (req, res, next) => {
     const { data: pages } = await axios(
       `https://graph.facebook.com/v11.0/${req.user.facebookId}/accounts?fields=data,id,name,category&access_token=${FB_ACCESS_TOKEN}`
     );
-
-    console.log(pages);
 
     const { data } = await axios("https://push.superfeedr.com", {
       params: {

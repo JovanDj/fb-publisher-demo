@@ -11,6 +11,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const passport = require("passport");
+const flash = require("express-flash");
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(morgan("dev"));
 app.use(cors());
 app.set("view engine", "pug");
 app.use(cookieParser());
+app.use(flash());
 
 app.use(
   session({
@@ -35,8 +37,7 @@ app.use(passport.session());
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.isAuthenticated();
-  res.locals.user = req.user;
-  res.locals.currentUrl = req.url;
+  res.locals.user = req?.session?.passport?.user;
   next();
 });
 

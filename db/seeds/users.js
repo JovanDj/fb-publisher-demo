@@ -6,13 +6,8 @@ module.exports.seed = (knex) => {
       // Inserts seed entries
       const faker = require("faker");
 
-      const users = Array.from({ length: 100 }, () => {
-        return {
-          email: faker.internet.exampleEmail(),
-          password: faker.internet.password(),
-        };
-      });
-
-      return knex("users").insert(users);
+      return knex("users").insert([
+        { email: "admin@mail.com", password: "admin" },
+      ]);
     });
 };

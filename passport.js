@@ -10,6 +10,7 @@ const {
 } = process.env;
 const User = require("./models/user");
 const TwitterStrategy = require("passport-twitter").Strategy;
+const LocalStrategy = require("passport-local").Strategy;
 
 // Passport session setup.
 passport.serializeUser((user, done) => {
@@ -34,39 +35,50 @@ passport.use(
       callbackURL: FB_CALLBACK_URL,
       enableProof: true,
       profileFields: ["id", "name", "email"],
+      passReqToCallback: true,
     },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const {
-          id: facebookId,
-          first_name: firstName,
-          last_name: lastName,
-          email,
-        } = profile._json;
-
-        const user = await User.query().findOne({ email });
-
-        if (user) {
-          const updatedUser = await User.query().patchAndFetchById(
-            user.userId,
-            {
-              facebookId,
-            }
-          );
-
-          return done(null, updatedUser);
-        } else {
-          const newUser = await User.query().insert({
-            facebookId,
-            firstName,
-            lastName,
+    async (req, accessToken, refreshToken, profile, done) => {
+      if (!req.user) {
+        try {
+          const {
+            id: facebookId,
+            first_name: firstName,
+            last_name: lastName,
             email,
-            password: "placeholder password",
-          });
-          return done(null, newUser);
+          } = profile._json;
+
+          const user = await User.query().findOne({ facebookId });
+
+          if (user) {
+            const updatedUser = await User.query().patchAndFetchById(
+              user.userId,
+              {
+                facebookId,
+              }
+            );
+
+            return done(null, updatedUser);
+          } else {
+            const newUser = await User.query().insert({
+              facebookId,
+              firstName,
+              lastName,
+              email,
+              password: "placeholder password",
+            });
+
+            return done(null, newUser);
+          }
+        } catch (error) {
+          return done(error, null);
         }
-      } catch (error) {
-        return done(error, null);
+      } else {
+        const { id: facebookId } = profile._json;
+        await User.query().patchAndFetchById(req.user.userId, {
+          facebookId,
+        });
+
+        return done(null, req.user);
       }
     }
   )
@@ -79,31 +91,70 @@ passport.use(
       consumerSecret: TWITTER_API_SECRET_KEY,
       callbackURL: TWITTER_CALLBACK_URL,
       includeEmail: true,
+      passReqToCallback: true,
     },
-    async (token, tokenSecret, profile, done) => {
-      try {
-        const { id: twitterId } = profile;
-        const email = profile.emails[0].value;
-        const user = await User.query().findOne({ email });
+    async (req, token, tokenSecret, profile, done) => {
+      if (!req.user) {
+        try {
+          const { id: twitterId } = profile;
+          const email = profile.emails[0].value;
+          const user = await User.query().findOne({ twitterId });
 
-        if (user) {
-          const updatedUser = await User.query().patchAndFetchById(
-            user.userId,
-            {
+          if (user) {
+            const updatedUser = await User.query().patchAndFetchById(
+              user.userId,
+              {
+                twitterId,
+              }
+            );
+            return done(null, updatedUser);
+          } else {
+            const newUser = await User.query().insert({
               twitterId,
-            }
-          );
-          return done(null, updatedUser);
-        } else {
-          const newUser = await User.query().insert({
+              email,
+              password: "placeholder password",
+            });
+            return done(null, newUser);
+          }
+        } catch (error) {
+          return done(error, null);
+        }
+      } else {
+        const { id: twitterId } = profile;
+
+        const updatedUser = await User.query().patchAndFetchById(
+          req.user.userId,
+          {
             twitterId,
-            email,
-            password: "placeholder password",
-          });
-          return done(null, newUser);
+          }
+        );
+        return done(null, req.user);
+      }
+    }
+  )
+);
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "email",
+    },
+    async (email, password, done) => {
+      try {
+        const user = await User.query().findOne({ email });
+        if (user) {
+          return done(null, user);
+        }
+
+        if (!user) {
+          return done(null, false, { message: "Incorrect email." });
+        }
+
+        if (!user.password === password) {
+          return done(null, false, { message: "Incorrect password." });
         }
       } catch (error) {
-        return done(error, null);
+        return done(error);
       }
     }
   )

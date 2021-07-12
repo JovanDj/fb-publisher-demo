@@ -25,15 +25,18 @@ html(lang="en")
 
         unless (user && user.facebookId)
           form(method="POST", action="/auth/facebook")
-            button.btn.btn-primary(type="submit") Facebook Login
+            button.btn.btn-primary(type="submit") Facebook Connect
+        else
+          span.text-success Facebook connected
         unless (user && user.twitterId)
           form(method="POST", action="/auth/twitter")
-            button.btn.btn-primary(type="submit") Twitter Login
+            button.btn.btn-primary(type="submit") Twitter Connect
+        else
+          span.text-success Twitter connected
     .container
-      if !user
-        h1 Please Log In
-      else
-        h1= `Welcome, ${user.firstName} ${user.lastName}`
+      if user
+        h1= `Welcome, ${user.email}`
+
     block content
 
     script(src="/main.js")
