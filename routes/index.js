@@ -15,16 +15,23 @@ const parser = new Parser();
 const authorization = `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`;
 
 router.get("/", isAuthenticated, async (req, res, next) => {
-  // const { facebookId } = req.session.passport.user;
-
   try {
-    // const { data } = await axios(
-    //   `https://graph.facebook.com/v11.0/${facebookId}/accounts?fields=data,id,name,category&access_token=${FB_ACCESS_TOKEN}`
-    // );
+    if (req.user.facebookId) {
+      const { facebookId } = req.user.facebookId;
 
-    res.render("index", { user: req.session.passport.user });
+      const { data } = await axios(
+        `https://graph.facebook.com/v11.0/${req.user.facebookId}/accounts?fields=data,id,name,category&access_token=${FB_ACCESS_TOKEN}`
+      );
+
+      res.render("index", {
+        user: req.session.passport.user,
+        pages: data.data,
+      });
+    } else {
+      res.render("index", { user: req.session.passport.user });
+    }
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     next(error);
   }
 });

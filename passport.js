@@ -78,6 +78,8 @@ passport.use(
           facebookId,
         });
 
+        req.session.passport.user.facebookId = facebookId;
+
         return done(null, req.user);
       }
     }
@@ -128,6 +130,8 @@ passport.use(
             twitterId,
           }
         );
+        req.session.passport.user.twitterId = twitterId;
+
         return done(null, req.user);
       }
     }
