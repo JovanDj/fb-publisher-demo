@@ -32,6 +32,7 @@ router.get("/", isAuthenticated, async (req, res, next) => {
       res.render("index", { user: req.session.passport.user });
     }
   } catch (error) {
+    // console.error(error);
     next(error);
   }
 });
@@ -173,7 +174,7 @@ router.post("/feeder/:subscriptionId", async (req, res, next) => {
 
     const { data } = await axios.post(
       "https://graph.facebook.com/" +
-        fbPageId +
+        facebookPageId +
         "/feed?link=" +
         permalinkUrl +
         "&access_token=" +

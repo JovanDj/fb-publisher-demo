@@ -2,7 +2,7 @@ require("dotenv").config();
 require("./passport");
 
 const express = require("express");
-const { PORT } = process.env;
+const { PORT, NODE_ENV } = process.env;
 const knex = require("knex");
 const knexFile = require("./knexfile");
 const { Model } = require("objection");
@@ -17,7 +17,7 @@ const app = express();
 
 app.use(express.static("public"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(cors());
 app.set("view engine", "pug");
@@ -30,7 +30,10 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    cookie: { maxAge: 24 * 60 * 60 * 60 },
+    cookie: {
+      maxAge: 24 * 60 * 60 * 60,
+      secure: NODE_ENV === "production" ? true : false,
+    },
     saveUninitialized: false,
   })
 );
