@@ -32,7 +32,6 @@ router.get("/", isAuthenticated, async (req, res, next) => {
       res.render("index", { user: req.session.passport.user });
     }
   } catch (error) {
-    // console.error(error);
     next(error);
   }
 });

@@ -24,14 +24,15 @@ app.set("view engine", "pug");
 app.use(cookieParser());
 app.use(flash());
 
+app.set("trust proxy", 1);
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
-    resave: true,
+    resave: false,
     proxy: true,
 
     cookie: { maxAge: 24 * 60 * 60 * 60 },
-    saveUninitialized: true,
+    saveUninitialized: false,
   })
 );
 app.use(passport.initialize());
