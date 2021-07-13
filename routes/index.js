@@ -13,6 +13,7 @@ const {
 const Parser = require("rss-parser");
 const parser = new Parser();
 const authorization = `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`;
+const Subscription = require("../models/subscription");
 
 router.get("/", isAuthenticated, async (req, res, next) => {
   try {
@@ -71,6 +72,15 @@ router.post("/pages/:pageId", isAuthenticated, async (req, res) => {
 
 router.post("/feed/subscribe", isAuthenticated, async (req, res, next) => {
   const { feed, fbPageId } = req.body;
+  const { twitterId, userId } = req.session.passport.user;
+  console.log(feed, fbPageId, twitterId, userId);
+
+  const { subscriptionId } = await Subscription.query().insertAndFetch({
+    feedUrl: feed,
+    facebookPageId: fbPageId,
+    twitterId,
+    userId,
+  });
 
   try {
     const { data } = await axios.post(
@@ -78,7 +88,7 @@ router.post("/feed/subscribe", isAuthenticated, async (req, res, next) => {
       {
         "hub.mode": "subscribe",
         "hub.topic": feed,
-        "hub.callback": `https://stormy-ravine-62749.herokuapp.com/feeder/${fbPageId}`,
+        "hub.callback": `https://stormy-ravine-62749.herokuapp.com/feeder/${subscriptionId}`,
         verify: "sync",
         retrieve: true,
         format: "json",
@@ -147,15 +157,19 @@ router.get("/feed/list", isAuthenticated, async (req, res, next) => {
   }
 });
 
-router.post("/feeder/:fbPageId", async (req, res, next) => {
+router.post("/feeder/:subscriptionId", async (req, res, next) => {
   const { items } = req.body;
-  const { fbPageId } = req.params;
+  const { subscriptionId } = req.params;
+
+  const { facebookPageId } = await Subscription.query().findById(
+    subscriptionId
+  );
 
   try {
     const { permalinkUrl } = items[0];
     // Get page token
     const { data: pageToken } = await axios(
-      `https://graph.facebook.com/${fbPageId}?fields=access_token&access_token=${FB_ACCESS_TOKEN}`
+      `https://graph.facebook.com/${facebookPageId}?fields=access_token&access_token=${FB_ACCESS_TOKEN}`
     );
 
     const { data } = await axios.post(
