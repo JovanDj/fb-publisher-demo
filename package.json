@@ -39,7 +39,8 @@
     "pug": "^3.0.2",
     "query-strings": "0.0.1",
     "rss-parser": "^3.12.0",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^5.0.2",
+    "twit": "^2.2.11"
   },
   "devDependencies": {
     "@prettier/plugin-pug": "^1.16.0",

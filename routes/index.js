@@ -9,11 +9,25 @@ const {
   FB_ACCESS_TOKEN,
   SUPERFEEDR_TOKEN,
   SUPERFEEDR_USERNAME,
+  TWITTER_API_KEY,
+  TWITTER_API_SECRET_KEY,
+  TWITTER_ACCESS_TOKEN,
+  TWITTER_ACCESS_TOKEN_SECRET,
 } = process.env;
 const Parser = require("rss-parser");
 const parser = new Parser();
 const authorization = `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`;
 const Subscription = require("../models/subscription");
+const Twit = require("twit");
+
+const tweet = new Twit({
+  consumer_key: TWITTER_API_KEY,
+  consumer_secret: TWITTER_API_SECRET_KEY,
+  access_token: TWITTER_ACCESS_TOKEN,
+  access_token_secret: TWITTER_ACCESS_TOKEN_SECRET,
+  timeout_ms: 60 * 1000, // optional HTTP request timeout to apply to all requests.
+  strictSSL: true, // optional - requires SSL certificates to be valid.
+});
 
 router.get("/", isAuthenticated, async (req, res, next) => {
   try {
@@ -168,6 +182,8 @@ router.post("/feeder/:subscriptionId", async (req, res, next) => {
   try {
     const { permalinkUrl } = items[0];
     // Get page token
+
+    // Post on fb
     const { data: pageToken } = await axios(
       `https://graph.facebook.com/${facebookPageId}?fields=access_token&access_token=${FB_ACCESS_TOKEN}`
     );
@@ -179,6 +195,16 @@ router.post("/feeder/:subscriptionId", async (req, res, next) => {
         permalinkUrl +
         "&access_token=" +
         pageToken.access_token
+    );
+
+    // Post on twitter
+
+    tweet.post(
+      "statuses/update",
+      { status: permalinkUrl },
+      function (err, data, response) {
+        console.log(data);
+      }
     );
 
     res.status(200).end();
