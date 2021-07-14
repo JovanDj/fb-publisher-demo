@@ -11,7 +11,7 @@
     "db:reset": "run-s db:migrate:undo db:setup",
     "db:seed": "knex seed:run",
     "db:setup": "run-s db:migrate db:seed",
-    "build": "npm run db:migrate:undo && npm run db:migrate"
+    "build": "npm run db:migrate:undo && npm run db:migrate && db:seed"
   },
   "author": "Digital Infinity",
   "license": "UNLICENCED",
