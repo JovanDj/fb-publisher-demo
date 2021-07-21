@@ -4,7 +4,6 @@ module.exports.seed = (knex) => {
     .del()
     .then(() => {
       // Inserts seed entries
-      const faker = require("faker");
 
       return knex("users").insert([
         { email: "admin@mail.com", password: "admin" },

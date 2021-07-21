@@ -14,6 +14,15 @@ block content
           select.form-select(name="fbPageId")
             each page in pages
               option(value=`${page.id}`)= page.name
+        .col
+          .form-check
+            input.form-check-input(
+              type="checkbox",
+              value="true",
+              name="sendMail"
+            )
+            label.form-check-label(for="flexCheckDefault")
+              | Send email?
 
       button.btn.btn-primary.mt-1(type="submit") Subscribe
 

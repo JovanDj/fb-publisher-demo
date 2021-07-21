@@ -5,6 +5,7 @@ module.exports.up = (knex) => {
     table.integer("twitter_id");
     table.integer("user_id").references("user_id").inTable("users");
     table.string("feed_url");
+    table.boolean("send_mail").defaultTo(false);
 
     table.timestamps(true, true);
   });

@@ -13,12 +13,24 @@ const {
   TWITTER_API_SECRET_KEY,
   TWITTER_ACCESS_TOKEN,
   TWITTER_ACCESS_TOKEN_SECRET,
+  MAILCHIMP_API_KEY,
+  MAILCHIMP_SERVER_PREFIX,
 } = process.env;
 const Parser = require("rss-parser");
 const parser = new Parser();
-const authorization = `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`;
 const Subscription = require("../models/subscription");
 const Twit = require("twit");
+const nodemailer = require("nodemailer");
+const authorization = `${SUPERFEEDR_USERNAME}:${SUPERFEEDR_TOKEN}`;
+
+const transport = nodemailer.createTransport({
+  host: "smtp.mailtrap.io",
+  port: 2525,
+  auth: {
+    user: "712fde9e188494",
+    pass: "855d209e732d8c",
+  },
+});
 
 const tweet = new Twit({
   consumer_key: TWITTER_API_KEY,
@@ -85,15 +97,15 @@ router.post("/pages/:pageId", isAuthenticated, async (req, res) => {
 });
 
 router.post("/feed/subscribe", isAuthenticated, async (req, res, next) => {
-  const { feed, fbPageId } = req.body;
+  const { feed, fbPageId, sendMail } = req.body;
   const { twitterId, userId } = req.session.passport.user;
-  console.log(feed, fbPageId, twitterId, userId);
 
   const { subscriptionId } = await Subscription.query().insertAndFetch({
     feedUrl: feed,
     facebookPageId: fbPageId,
     twitterId,
     userId,
+    sendMail,
   });
 
   try {
@@ -103,7 +115,7 @@ router.post("/feed/subscribe", isAuthenticated, async (req, res, next) => {
         "hub.mode": "subscribe",
         "hub.topic": feed,
         "hub.callback": `https://stormy-ravine-62749.herokuapp.com/feeder/${subscriptionId}`,
-        verify: "sync",
+        verify: "async",
         retrieve: true,
         format: "json",
       },
@@ -174,38 +186,50 @@ router.get("/feed/list", isAuthenticated, async (req, res, next) => {
 router.post("/feeder/:subscriptionId", async (req, res, next) => {
   const { items } = req.body;
   const { subscriptionId } = req.params;
-
-  const { facebookPageId } = await Subscription.query().findById(
-    subscriptionId
-  );
-
   try {
+    const { facebookPageId, twitterId, sendMail, user } =
+      await Subscription.query()
+        .findById(subscriptionId)
+        .withGraphJoined({ user: true });
+
     const { permalinkUrl } = items[0];
     // Get page token
 
     // Post on fb
-    const { data: pageToken } = await axios(
-      `https://graph.facebook.com/${facebookPageId}?fields=access_token&access_token=${FB_ACCESS_TOKEN}`
-    );
+    if (facebookPageId) {
+      const { data: pageToken } = await axios(
+        `https://graph.facebook.com/${facebookPageId}?fields=access_token&access_token=${FB_ACCESS_TOKEN}`
+      );
 
-    const { data } = await axios.post(
-      "https://graph.facebook.com/" +
-        facebookPageId +
-        "/feed?link=" +
-        permalinkUrl +
-        "&access_token=" +
-        pageToken.access_token
-    );
+      await axios.post(
+        "https://graph.facebook.com/" +
+          facebookPageId +
+          "/feed?link=" +
+          permalinkUrl +
+          "&access_token=" +
+          pageToken.access_token
+      );
 
+      console.log("Posted on facebook!");
+    }
     // Post on twitter
 
-    tweet.post(
-      "statuses/update",
-      { status: permalinkUrl },
-      function (err, data, response) {
-        console.log(data);
-      }
-    );
+    if (twitterId) {
+      await tweet.post("statuses/update", { status: permalinkUrl });
+      console.log("Posted on twitter!");
+    }
+
+    // Send Email
+    if (sendMail) {
+      await transporter.sendMail({
+        from: "fb-publisher-demo@digitalinfinity.com",
+        to: user.email,
+        subject: "New episode.",
+        html: `<p>New episode at <a href="${permalinkUrl}">${permalinkUrl}</a></p>`,
+      });
+
+      console.log("Sent email!");
+    }
 
     res.status(200).end();
   } catch (error) {
