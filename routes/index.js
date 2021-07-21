@@ -13,8 +13,8 @@ const {
   TWITTER_API_SECRET_KEY,
   TWITTER_ACCESS_TOKEN,
   TWITTER_ACCESS_TOKEN_SECRET,
-  MAILCHIMP_API_KEY,
-  MAILCHIMP_SERVER_PREFIX,
+  MAILTRAP_USER,
+  MAILTRAP_PASSWORD,
 } = process.env;
 const Parser = require("rss-parser");
 const parser = new Parser();
@@ -27,8 +27,8 @@ const transport = nodemailer.createTransport({
   host: "smtp.mailtrap.io",
   port: 2525,
   auth: {
-    user: "712fde9e188494",
-    pass: "855d209e732d8c",
+    user: MAILTRAP_USER,
+    pass: MAILTRAP_PASSWORD,
   },
 });
 
