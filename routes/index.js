@@ -221,7 +221,7 @@ router.post("/feeder/:subscriptionId", async (req, res, next) => {
 
     // Send Email
     if (sendMail) {
-      await transporter.sendMail({
+      await transport.sendMail({
         from: "fb-publisher-demo@digitalinfinity.com",
         to: user.email,
         subject: "New episode.",
