@@ -1,0 +1,20 @@
+nav.navbar.navbar-light.bg-light
+  .container
+    a.navbar-brand(href="/") Social Media Publisher Demo
+
+    if user
+      a.nav-link(href="/workflows/") Workflows
+
+      form(method="POST", action="/auth/logout")
+        button.btn.btn-primary(type="submit") Logout
+
+      unless (user && user.facebookId)
+        form(method="POST", action="/auth/facebook")
+          button.btn.btn-primary(type="submit") Facebook Connect
+      else
+        span.text-success Facebook connected
+      unless (user && user.twitterId)
+        form(method="POST", action="/auth/twitter")
+          button.btn.btn-primary(type="submit") Twitter Connect
+      else
+        span.text-success Twitter connected

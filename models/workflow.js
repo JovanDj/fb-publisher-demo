@@ -1,16 +1,17 @@
 const { Model } = require("objection");
 
-class Subscription extends Model {
+class Workflow extends Model {
   static get tableName() {
-    return "subscriptions";
+    return "workflows";
   }
 
   static get idColumn() {
-    return "subscriptionId";
+    return "workflowId";
   }
 
   static get relationMappings() {
     const User = require("./user");
+    const Trigger = require("./trigger");
 
     return {
       user: {
@@ -21,28 +22,28 @@ class Subscription extends Model {
         // subclass constructor `Animal` here.
         modelClass: User,
         join: {
-          from: "subscriptions.userId",
+          from: "workflows.userId",
           to: "users.userId",
         },
       },
-      members: {
+      triggers: {
         relation: Model.ManyToManyRelation,
         // The related model. This can be either a Model
         // subclass constructor or an absolute file path
         // to a module that exports one. We use a model
         // subclass constructor `Animal` here.
-        modelClass: Subscription,
+        modelClass: Trigger,
         join: {
-          from: "users.userId",
+          from: "workflows.workflowId",
           through: {
-            from: "membersUsers.userId",
-            to: "membersUsers.memberId",
+            from: "triggersWorkflows.workflowId",
+            to: "triggersWorkflows.triggerId",
           },
-          to: "users.userId",
+          to: "triggers.triggerId",
         },
       },
     };
   }
 }
 
-module.exports = Subscription;
+module.exports = Workflow;

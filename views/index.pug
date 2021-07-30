@@ -2,10 +2,16 @@ extends layout
 
 block content
   .container
-    if user && pages
-      each page in pages 
-        ul
-          li
-            a(href=`/pages/${page.id}?name=${page.name}`)= `ID: ${page.id}`
-          li= `Name: ${page.name}`
-          li= `Category: ${page.category}`
+    unless workflows.length
+      p You don't have any workflows. Create one now!
+      a.btn.btn-link.btn-outline-primary.btn-lg(href="/workflows") Create your first workflow
+    else
+    h2 Your Workflows
+    each workflow in workflows 
+      ol
+        if workflow.facebookPageId
+          li= `Post on facebook page: ${workflow.facebookPageId}`
+        if workflow.twitterId
+          li Post on Twitter
+        if workflow.sendMail
+          li Send email

@@ -1,4 +1,7 @@
 
+
+*.sqlite
+
 # Created by https://www.toptal.com/developers/gitignore/api/node,windows,git,linux,macos,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,windows,git,linux,macos,visualstudiocode
 

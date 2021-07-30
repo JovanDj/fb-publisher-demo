@@ -1,13 +1,12 @@
 const { Model } = require("objection");
-const Password = require("objection-password")();
 
-class User extends Password(Model) {
+class Trigger extends Model {
   static get tableName() {
-    return "users";
+    return "triggers";
   }
 
   static get idColumn() {
-    return "userId";
+    return "triggerId";
   }
 
   static get relationMappings() {
@@ -15,19 +14,23 @@ class User extends Password(Model) {
 
     return {
       workflows: {
-        relation: Model.HasManyRelation,
+        relation: Model.ManyToManyRelation,
         // The related model. This can be either a Model
         // subclass constructor or an absolute file path
         // to a module that exports one. We use a model
         // subclass constructor `Animal` here.
         modelClass: Workflow,
         join: {
-          from: "users.userId",
-          to: "workflows.userId",
+          from: "triggers.triggerId",
+          through: {
+            from: "triggersWorkflows.triggerId",
+            to: "triggersWorkflows.workflowId",
+          },
+          to: "workflows.workflowId",
         },
       },
     };
   }
 }
 
-module.exports = User;
+module.exports = Trigger;
