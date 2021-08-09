@@ -3,6 +3,7 @@ module.exports.up = (knex) => {
     table.increments("workflow_id");
     table.integer("facebook_page_id");
     table.integer("twitter_id");
+    table.string("message");
     table.integer("user_id").references("user_id").inTable("users");
     table.boolean("send_mail").defaultTo(false);
 

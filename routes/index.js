@@ -4,8 +4,6 @@ const { isAuthenticated } = require("../middleware");
 const axios = require("axios").default;
 const {
   FB_ACCESS_TOKEN,
-  SUPERFEEDR_TOKEN,
-  SUPERFEEDR_USERNAME,
   TWITTER_API_KEY,
   TWITTER_API_SECRET_KEY,
   TWITTER_ACCESS_TOKEN,
@@ -48,7 +46,7 @@ router.get("/", isAuthenticated, async (req, res, next) => {
 
 router.post("/workflow/", isAuthenticated, async (req, res, next) => {
   try {
-    const { fbPageId, sendMail, postOnTwitter } = req.body;
+    const { fbPageId, sendMail, postOnTwitter, message } = req.body;
     const { twitterId, userId } = req.session.passport.user;
 
     await Workflow.query().insert({
@@ -56,6 +54,7 @@ router.post("/workflow/", isAuthenticated, async (req, res, next) => {
       twitterId: postOnTwitter ? twitterId : null,
       userId,
       sendMail,
+      message,
     });
 
     res.redirect("/");
@@ -80,12 +79,30 @@ router.get("/workflows", isAuthenticated, async (req, res, next) => {
 });
 
 router.post("/feed/", async (req, res, next) => {
-  const { link, title } = req.body;
+  const { link, title, author } = req.body;
+
   try {
     const workflows = await Workflow.query().withGraphJoined({ user: true });
 
     workflows.forEach(async (workflow) => {
-      const { facebookPageId, twitterId, sendMail, user } = workflow;
+      const { facebookPageId, twitterId, sendMail, user, message } = workflow;
+
+      const text = () => {
+        const strings = message.split(" ");
+        const keys = Object.keys(req.body);
+
+        strings.forEach((string, i) => {
+          keys.forEach((key, k) => {
+            if (
+              key === string.replace("$", "").replace("{", "").replace("}", "")
+            ) {
+              strings[i] = req.body[key];
+            }
+          });
+        });
+
+        return strings.join(" ");
+      };
 
       // Post on fb
       if (facebookPageId) {
@@ -98,6 +115,8 @@ router.post("/feed/", async (req, res, next) => {
             facebookPageId +
             "/feed?link=" +
             link +
+            "&message=" +
+            `${text()} ${link}` +
             "&access_token=" +
             pageToken.access_token
         );
@@ -108,7 +127,7 @@ router.post("/feed/", async (req, res, next) => {
       // Post on twitter
 
       if (twitterId) {
-        await tweet.post("statuses/update", { status: link });
+        await tweet.post("statuses/update", { status: `${text()} ${link}` });
         console.log("Posted on twitter!");
       }
       // Send Email
@@ -119,7 +138,7 @@ router.post("/feed/", async (req, res, next) => {
           from: "fb-publisher-demo@digitalinfinity.com",
           to: email,
           subject: "New episode.",
-          html: `<p>New episode: <a href="${link}">${title}</a></p>`,
+          html: `<p>${text()}</p><p>New episode: <a href="${link}">${title}</a></p>`,
         });
 
         console.log("Sent email!");
